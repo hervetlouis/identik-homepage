@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identik — Infrastructure d'Identité</title>
+    
+    <!-- Police Inter pour un rendu pro et neutre -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #ffffff;       /* Blanc */
+            --text: #1a1a1a;     /* Noir profond */
+            --subtext: #666666;  /* Gris neutre */
+            --accent: #e5e5e5;   /* Bordures légères */
+            --blue: #2563eb;     /* Bleu technique */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- UI COMPONENTS --- */
+        
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: -1;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Navigation */
+        nav {
+            padding: 32px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+        }
+
+        .brand {
+            font-weight: 500;
+            letter-spacing: -0.5px;
+            font-size: 1.1rem;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-link {
+            color: var(--subtext);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        .nav-link:hover { color: var(--text); }
+
+        /* Hero Section */
+        header {
+            padding: 80px 0 60px 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .hero-left {
+            max-width: 550px;
+        }
+
+        .hero-right {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 500px;
+        }
+
+        .hero-right img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .dashboard-image {
+            width: 190%;
+            max-width: 190%;
+            position: relative;
+            z-index: 1;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .mobile-mockup {
+            position: absolute;
+            width: 320px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+            border-radius: 44px;
+            border: none;
+            overflow: hidden;
+            left: -60px;
+            bottom: 40px;
+            z-index: 2;
+        }
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 500;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 32px;
+        }
+
+        .line-wrapper {
+            overflow: hidden;
+            display: block;
+        }
+        .line-text {
+            display: block;
+            transform: translateY(100%);
+        }
+
+        .sub-hero {
+            color: var(--subtext);
+            font-size: 1.1rem;
+            max-width: 500px;
+            margin-bottom: 48px;
+            opacity: 0;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            background: var(--blue);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: transform 0.2s, background 0.2s;
+            opacity: 0;
+            margin-right: 24px;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            display: inline-block;
+            background: transparent;
+            color: var(--blue);
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: opacity 0.3s, color 0.2s;
+            opacity: 0;
+            border: 1px solid var(--blue);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .cta-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 48px;
+        }
+
+        /* Section Interface (Code Snippet) */
+        .interface-preview {
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 2px;
+            background: rgba(0,0,0,0.02);
+            margin: 120px 0;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .fake-ui {
+            background: #f5f5f5;
+            border-radius: 6px;
+            padding: 24px;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace; /* Police code plus jolie */
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: #666;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .code-keyword { color: #c678dd; } /* Violet (const, await) */
+        .code-func { color: #61afef; }    /* Bleu (login) */
+        .code-string { color: #98c379; }  /* Vert (strings) */
+        .code-obj { color: #e5c07b; }     /* Jaune (propriétés) */
+        .code-comment { color: #5c6370; font-style: italic; }
+
+        .cursor { 
+            display: inline-block; 
+            width: 8px; 
+            height: 1.2em; 
+            background: var(--blue); 
+            animation: blink 1s infinite; 
+            vertical-align: sub;
+            margin-left: 5px;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Features Grid */
+        .grid-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1px;
+            background: var(--accent);
+            border: 1px solid var(--accent);
+            margin-top: 120px;
+        }
+
+        .feature-item {
+            background: var(--bg);
+            padding: 40px;
+            transition: background 0.3s;
+        }
+
+        .feature-item:hover {
+            background: #f9f9f9;
+        }
+
+        .feature-item h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .feature-item p {
+            font-size: 0.9rem;
+            color: var(--subtext);
+        }
+
+        /* Footer */
+        footer {
+            padding: 80px 0;
+            border-top: 1px solid rgba(0,0,0,0.08);
+            margin-top: 120px;
+            color: var(--subtext);
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        /* Contact modal (style cohérente avec le site) */
+        .contact-modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 1200; }
+        .contact-modal.open { display: flex; }
+        .contact-modal__backdrop {
+            position: absolute; inset: 0; background: rgba(255,255,255,0.6); backdrop-filter: blur(6px);
+        }
+        .contact-modal__panel {
+            position: relative;
+            width: min(520px, calc(100% - 48px));
+            background: linear-gradient(180deg, #fafafa, #f5f5f5);
+            border: 1px solid rgba(0,0,0,0.08);
+            padding: 24px 20px 28px 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            color: var(--text);
+            transform: translateY(12px);
+            opacity: 0;
+            transition: opacity 220ms ease, transform 220ms ease;
+        }
+        .contact-modal.open .contact-modal__panel { transform: translateY(0); opacity: 1; }
+        .contact-modal__close {
+            position: absolute; right: 10px; top: 10px; background: transparent; border: none; color: var(--subtext); font-size: 18px; cursor: pointer;
+        }
+        .contact-modal__panel h2 { margin: 6px 0 2px 0; font-size: 1.1rem; color: var(--text); }
+        .contact-modal__desc { color: var(--subtext); font-size: 0.95rem; margin-bottom: 14px; }
+        .contact-modal__buttons { display: flex; gap: 12px; flex-direction: column; }
+        .contact-btn {
+            display: flex; flex-direction: column; text-decoration: none; padding: 12px 14px; border-radius: 8px;
+            background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08); color: var(--text);
+            transition: transform 0.15s, background 0.15s; font-weight: 500;
+        }
+        .contact-btn:hover { transform: translateY(-3px); background: rgba(0,0,0,0.04); }
+        .contact-sub { font-size: 0.85rem; color: var(--subtext); margin-top: 6px; font-weight: 400; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                padding: 60px 0 40px 0;
+            }
+            
+            .cta-group {
+                flex-direction: column;
+                align-items: flex-start;
+                margin-top: 40px;
+            }
+
+            .btn-primary, .btn-secondary {
+                width: 100%;
+                text-align: center;
+                margin-right: 0;
+            }
+
+            h1 {
+                font-size: clamp(1.75rem, 4vw, 2.5rem);
+            }
+
+            .mobile-mockup {
+                position: absolute;
+                width: 200px;
+                border-radius: 32px;
+                border: none;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+                left: -30px;
+                bottom: 20px;
+            }
+
+            .hero-right {
+                height: 400px;
+            }
+        }
+    </style>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+
+    <div class="grid-bg"></div>
+
+    <div class="container">
+        <nav>
+            <a href="index.htm" class="brand">Identik.</a>
+            <div class="nav-links">
+                <a href="tarifs.htm" class="nav-link">Tarifs</a>
+                <a href="https://console.identik.eu" class="nav-link" target="_blank">Console <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" style="margin-left: 4px; vertical-align: baseline;" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/><path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/></svg></a>
+                <a href="#" id="contact-link" class="nav-link">Contact</a>
+            </div>
+        </nav>
+
+        <header>
+            <div class="hero-left">
+                <h1>
+                    Une API d'authentification que vous contrôlez.
+                </h1>
+                <p class="sub-hero">
+                    Centralisez l'authentification, le SSO et les accès utilisateurs via une API claire, conforme aux standards européens.
+                </p>
+                <div class="cta-group">
+                    <a href="https://console.identik.eu" class="btn-primary">Accéder à la console</a>
+                    <a href="#" class="btn-secondary">Voir la documentation</a>
+                </div>
+            </div>
+            <div class="hero-right">
+                <img src="871shots_so.png" alt="Tableau de bord Identik" class="dashboard-image">
+                <img src="979shots_so.png" alt="Interface de connexion mobile" class="mobile-mockup">
+            </div>
+        </header>
+
+
+        <!-- NOUVELLE VERSION : Code épuré -->
+        <section class="interface-preview">
+            <div class="fake-ui">
+                <span class="code-comment">// 1. Initialiser le client Identik</span><br>
+                <span class="code-keyword">const</span> auth = <span class="code-keyword">new</span> <span class="code-obj">Identik</span>(<span class="code-string">"api_key"</span>);<br><br>
+                
+                <span class="code-comment">// 2. Authentifier l'utilisateur</span><br>
+                <span class="code-keyword">const</span> session = <span class="code-keyword">await</span> auth.<span class="code-func">login</span>({<br>
+                &nbsp;&nbsp;<span class="code-obj">redirect_to</span>: <span class="code-string">"https://demo.identik.eu/account"</span>,<br>
+                &nbsp;&nbsp;<span class="code-obj">allow_fastpass</span>: <span class="code-keyword">true</span><br>
+                });<br><br>
+
+                <span class="code-keyword">if</span> (session.verified) {<br>
+                &nbsp;&nbsp;<span class="code-obj">console</span>.<span class="code-func">log</span>(<span class="code-string">"Accès autorisé"</span>);<span class="cursor"></span><br>
+                }
+            </div>
+        </section>
+
+        <section>
+            <div class="grid-features">
+                <div class="feature-item">
+                    <h3>Intégration instantanée</h3>
+                    <p>Fini les semaines de configuration SAML. Copiez-collez notre SDK et sécurisez vos routes.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Zéro latence</h3>
+                    <p>Architecture distribuée à l'edge. Vos authentifications prennent moins de 100ms.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Audit logs</h3>
+                    <p>Traçabilité complète et immuable de chaque tentative d'accès pour vos audits de sécurité.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div>© 2025 Identik</div>
+            <div>Paris, France</div>
+        </footer>
+    </div>
+    <div id="contact-modal" class="contact-modal" aria-hidden="true">
+        <div class="contact-modal__backdrop" id="contact-modal-backdrop"></div>
+        <div class="contact-modal__panel" role="dialog" aria-modal="true" aria-labelledby="contact-modal-title">
+            <button class="contact-modal__close" id="contact-modal-close" aria-label="Fermer">✕</button>
+            <h2 id="contact-modal-title">Nous contacter</h2>
+            <p class="contact-modal__desc">Choisissez le service adapté à votre demande</p>
+            <div class="contact-modal__buttons">
+                <a class="contact-btn" href="mailto:soren@identik.eu?subject=Contact%20commercial">Service commercial
+                    <span class="contact-sub">Soren David - soren@identik.eu</span>
+                </a>
+                <a class="contact-btn" href="mailto:louis@identik.eu?subject=Support%20technique">Service technique
+                    <span class="contact-sub">Louis Hervet - louis@identik.eu</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", (event) => {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // 1. Animation Titre
+            gsap.from("h1", {
+                opacity: 0,
+                y: 30,
+                duration: 1,
+                ease: "power3.out",
+                delay: 0.2
+            });
+
+            // 2. Fade in sous-titre/boutons
+            gsap.to([".sub-hero", ".cta-group"], {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                stagger: 0.15,
+                ease: "power3.out",
+                delay: 0.4
+            });
+
+            // 3. Entrée des images héro
+            gsap.to([".dashboard-image", ".mobile-mockup"], {
+                opacity: 1,
+                scale: 1,
+                duration: 1.2,
+                stagger: 0.2,
+                ease: "power3.out",
+                delay: 0.6
+            });
+
+            // Initial state pour les images
+            gsap.set([".dashboard-image", ".mobile-mockup"], { opacity: 0, scale: 0.9 });
+
+            // 4. Reveal de la fausse interface
+            gsap.to(".interface-preview", {
+                opacity: 1,
+                y: 0,
+                duration: 1.5,
+                ease: "power3.out",
+                delay: 1.2,
+                scrollTrigger: {
+                    trigger: ".interface-preview",
+                    start: "top 90%",
+                    once: true
+                }
+            });
+
+            // 5. Features au scroll
+            gsap.from(".feature-item", {
+                scrollTrigger: {
+                    trigger: ".grid-features",
+                    start: "top 85%",
+                },
+                y: 30,
+                opacity: 0,
+                duration: 0.8,
+                stagger: 0.1,
+                ease: "power2.out"
+            });
+
+            // Contact modal behaviour
+            const contactLink = document.getElementById('contact-link');
+            const modal = document.getElementById('contact-modal');
+            const backdrop = document.getElementById('contact-modal-backdrop');
+            const closeBtn = document.getElementById('contact-modal-close');
+
+            function openModal() {
+                modal.setAttribute('aria-hidden', 'false');
+                modal.classList.add('open');
+                closeBtn.focus();
+            }
+
+            function closeModal() {
+                modal.setAttribute('aria-hidden', 'true');
+                modal.classList.remove('open');
+                contactLink.focus();
+            }
+
+            contactLink && contactLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                openModal();
+            });
+
+            backdrop && backdrop.addEventListener('click', closeModal);
+            closeBtn && closeBtn.addEventListener('click', closeModal);
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+        });
+    </script>
+</body>
+</html>
